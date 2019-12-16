@@ -7,6 +7,7 @@ const logger = require("./middleware/logger.js");
 const server = express();
 
 server.use(helmet());
+// converts data to JSON and attached on req.body
 server.use(express.json());
 
 server.use(logger);
