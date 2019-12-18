@@ -24,32 +24,30 @@ router.post("/register", (req, res) => {
 
 router.post("/login", (req, res) => {
   let { username, password } = req.body;
-  if (username && password) {
-    Users.findBy({ username })
-      .first()
-      .then(user => {
-        if (user && bcrypt.compare(password, user.password)) {
-          res.status(200).json({ message: `Welcome ${user.username}` });
-        } else {
-          res.status(401).json({ message: "You shall not pass!" });
-        }
-      })
-      .catch(err => {
-        res.status(500).json(err);
-      });
-  } else {
-    res.status(400).json({ message: "Please provide credentials" });
-  }
-});
 
-router.get("/users", Protected, (req, res) => {
-  Users.find()
-    .then(users => {
-      res.status(200).json(users);
+  Users.findBy({ username })
+    .first()
+    .then(user => {
+      if (user && bcrypt.compare(password, user.password)) {
+        req.session.username = user.username;
+        res.status(200).json({ message: `Welcome ${user.username}` });
+      } else {
+        res.status(401).json({ message: "You shall not pass!" });
+      }
     })
     .catch(err => {
-      res.status(500).send(err);
+      res.status(500).json(err);
     });
+});
+
+router.get("/logout", (req, res) => {
+  if (req.session) {
+    req.session.destroy(err => {
+      res.status(200).json({ message: "you have been logged out" });
+    });
+  } else {
+    res.status(200).json({ message: "already logged out" });
+  }
 });
 
 module.exports = router;
